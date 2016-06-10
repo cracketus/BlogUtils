@@ -8,21 +8,34 @@ __author__ = 'cracketus'
 # Watermarked images will be stored in the given directory as copies
 
 # The main idea of script is to create a new image with the same size. New image has black background and
-# gray (0xC8C8C8) watermark text. Then we apply this image to original image as alpha-mask.
+# gray watermark text. Then we apply this image to original image as for alpha channel.
 # RGB of black color is 0x000000. 0x00 corresponds to 100% transparent in alpha-mask and 0xFF is nontransparent.
-# Our gray (0xC8) color text corresponds to ~22% transparency in alpha-mask.
-# So, the watermarked image will look like original picture with the 50% transparent text in the given position.
+# Help function calculates gray color according to given transparency.
+# So, the watermarked image will look like original picture with the partially transparent text in the given position.
 #
 # You can change RGB of watermarked text to get more appropriate effect for your images. In the "TestImages" directory
 # you find samples pictures to test watermark text (e.g. black-white gradient or some popular textures)
 
 WATERMARK_TEXT = 'Timur Shevlyakov | cracketus'
-WATERMARK_TEXT_RGB = (200, 200, 200)
+WATERMARK_TRANSPARENCY = 25  # in percents
 WATERMARK_MARGIN = 10
+FONT_FILE = 'comic.ttf'
 FONT_SIZE = 35
 SOURCE_DIR = '.\TestImages'
 WATERMARKED_DIR = '.\TestImages\Watermarked'
 IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png']
+
+
+def calculate_watermark_color(transparency):
+    """
+    Help function. Calculate internal color corresponds to given transparency
+    :param transparency: transparency in percents
+    :return: color
+    """
+    assert 100 >= transparency >= 0
+
+    color = 255 - (255 / 100 * transparency)
+    return color, color, color
 
 
 def calculate_pos(width, height, text_width, text_height, align='top-left'):
@@ -69,20 +82,20 @@ def add_watermark(file_name, align, font_size):
         im_w, im_h = im.size
         watermark = Image.new('RGBA', (im_w, im_h))
         # create watermark draw-object to draw text
-        waterdraw = ImageDraw.ImageDraw(watermark, 'RGBA')
+        draw = ImageDraw.ImageDraw(watermark, 'RGBA')
 
         # specify font parameters
-        font = ImageFont.truetype("comic.ttf", font_size)
-        w, h = waterdraw.textsize(WATERMARK_TEXT, font)
+        font = ImageFont.truetype(FONT_FILE, font_size)
+        w, h = draw.textsize(WATERMARK_TEXT, font)
 
         # calculate (x, y)-coordinates for text
         x, y = calculate_pos(im_w, im_h, w, h, align)
         # draw text
-        waterdraw.text((x, y), WATERMARK_TEXT, WATERMARK_TEXT_RGB, font)
+        watermark_color = calculate_watermark_color(WATERMARK_TRANSPARENCY)
+        draw.text((x, y), WATERMARK_TEXT, watermark_color, font)
 
         # convert draw object to 8-bit gray-scale and put it as alpha
-        watermask = watermark.convert("L")
-        watermark.putalpha(watermask)
+        watermark.putalpha(watermark.convert("L"))
 
         # paste watermark to the original image
         im.paste(watermark, None, watermark)
