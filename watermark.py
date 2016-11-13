@@ -1,4 +1,6 @@
 import os
+
+import math
 from PIL import Image, ImageDraw, ImageFont
 
 __author__ = 'cracketus'
@@ -35,7 +37,8 @@ def calculate_watermark_color(transparency):
     assert 100 >= transparency >= 0
 
     color = 255 - (255 / 100 * transparency)
-    return color, color, color
+    color = math.floor(color)
+    return "#{0:02x}{1:02x}{2:02x}".format(color, color, color)
 
 
 def calculate_pos(width, height, text_width, text_height, align='top-left'):
@@ -72,7 +75,7 @@ def add_watermark(file_name, align, font_size):
     :param align: relative position in the image
     :param font_size: size of watermark text
     """
-    print 'Processing: ' + file_name
+    print('Processing: ' + file_name)
     try:
         # open an original image
         full_path = os.path.join(SOURCE_DIR, file_name)
@@ -85,7 +88,7 @@ def add_watermark(file_name, align, font_size):
         draw = ImageDraw.ImageDraw(watermark, 'RGBA')
 
         # specify font parameters
-        font = ImageFont.truetype(FONT_FILE, font_size)
+        font = ImageFont.truetype(FONT_FILE, int(font_size))
         w, h = draw.textsize(WATERMARK_TEXT, font)
 
         # calculate (x, y)-coordinates for text
@@ -104,7 +107,7 @@ def add_watermark(file_name, align, font_size):
 
         im.save(wm_file)
 
-        print 'Saved watermarked image: ' + wm_file
+        print('Saved watermarked image: ' + wm_file)
     except IOError as err:
         print('IO error: {0}'.format(err))
 
@@ -119,7 +122,7 @@ def main():
         extension = os.path.splitext(f)[1].lower()
         # and apply watermark to all images
         if extension in IMAGE_EXTENSIONS:
-            add_watermark(f, 'bottom-right', FONT_SIZE)
+            add_watermark(f, 'bottom-right', int(FONT_SIZE))
 
 
 if __name__ == '__main__':
