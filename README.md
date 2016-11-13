@@ -12,5 +12,5 @@ specified text size, font and transparency
 - [x] Save watermarked images separate
 
 ### Language / libraries / technologies
-* :snake: [Python 2.7](https://www.python.org/download/releases/2.7/)
+* :snake: [Python 3.5.2](https://www.python.org/ftp/python/3.5.2/python-3.5.2.exe)
 * [Pillow library (PIL fork)](https://pillow.readthedocs.io/en/3.2.x/)
